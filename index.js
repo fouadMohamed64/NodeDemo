@@ -1,13 +1,38 @@
 const express = require('express');
-const fs = require('fs');
-
+// const fs = require('fs');
+const todoRoutes = require('./Routes/todos.route');
+const userRoutes = require('./Routes/users.route');
 
 const app = express();
 
 
 
 // Middle ware => parsing JSON into JS
-app.use(express.json()); 
+app.use(express.json());
+
+app.use(function (req, res, next) {
+    console.log('inside custom middle ware');
+    next();
+})
+
+app.use(express.static('./Static'));
+
+
+
+app.use('/todo' , todoRoutes);
+app.use('/user' , userRoutes);
+
+
+/**
+ * URL/PORT/todo/todo
+ * URL/PORT/user/user
+ */
+
+/**
+ * URL/PORT/todo/
+ * URL/PORT/user/
+ */
+
 
 /**
  * Express => package
@@ -66,50 +91,10 @@ app.use(express.json());
 
 
 
+// todos routes
 
-app.post('/todo' , (req , res)=>{
-    let todo = req.body;
-    let todos = JSON.parse(fs.readFileSync('./todos.json' , {encoding: 'utf8'}));
-    todos.push(todo);
-    fs.writeFile('./todos.json' , JSON.stringify(todos) , ()=>{
-        res.status(201).json({ data: todo, message: "Successfull"})
-    })
-});
+// users route
 
-
-app.get('/todo' , (req , res)=>{
-    let todos = JSON.parse(fs.readFileSync('./todos.json' , {encoding: 'utf8'}));
-    res.status(200).json({ data: todos, message: "Successfull"});
-});
-
-
-app.get('/todo/:id' , (req , res)=>{
-    let {id} = req.params;
-    let todos =JSON.parse(fs.readFileSync('./todos.json', {encoding: 'utf8'}));
-    // let todo = todos.find((ele) =>{ ele.id === Number(id)}) 
-    // let todo = todos.find((ele) =>{ ele.id ===  parseInt(id)}) 
-    let todo = todos.find((ele) =>{ return ele.id === +id})
-    if (!todo) {
-        return res.status(404).json({message: "fail"});
-    }
-    res.status(200).json({message: "Successfull", data: todo});
-})
-
-
-app.delete('/todo/:id' , (req ,res)=>{
-    let {id} = req.params;
-    let todos = JSON.parse(fs.readFileSync('./todos.json', {encoding: 'utf8'}));
-    let todoIndex = todos.findIndex((ele) => ele.id == id); // if not found => -1
-    if (todoIndex == -1 ) {
-        return res.status(404).json({message: "this is not found "})
-    }
-    console.log(todoIndex)
-    todos.splice(todoIndex , 1);
-    console.log(todos);
-    fs.writeFile('./todos.json' , JSON.stringify(todos) , ()=>{
-        res.status(204).json();
-    })
-});
 
 // [ , , , , , ,]
 // find => splice(start , countNumber )
@@ -121,7 +106,10 @@ app.delete('/todo/:id' , (req ,res)=>{
 
 
 
-
+// NOt Found Middle Ware
+app.use('/', function (req, res, next) {
+    res.status(404).json({ message: `This ${req.url} Is Not Found...` });
+})
 
 
 
