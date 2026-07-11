@@ -1,42 +1,58 @@
 const fs = require('fs');
+const todoModel = require('../Models/todo.model');
 
-exports.save = (req, res) => {
+exports.save = async (req, res) => {
     let todo = req.body;
-    let todos = JSON.parse(fs.readFileSync('./todos.json', { encoding: 'utf8' }));
-    todos.push(todo);
-    fs.writeFile('./todos.json', JSON.stringify(todos), () => {
-        res.status(201).json({ data: todo, message: "Successfull" })
-    })
+    await todoModel.create(todo);
+    res.status(201).json({ message: "Created Successfully", data: todo })
 }
 
-exports.getTodos = (req, res) => {
-    let todos = JSON.parse(fs.readFileSync('./todos.json', { encoding: 'utf8' }));
-    res.status(200).json({ data: todos, message: "Successfull" });
-}
-
-exports.getTodoById = (req, res) => {
-    let { id } = req.params;
-    let todos = JSON.parse(fs.readFileSync('./todos.json', { encoding: 'utf8' }));
-    // let todo = todos.find((ele) =>{ ele.id === Number(id)}) 
-    // let todo = todos.find((ele) =>{ ele.id ===  parseInt(id)}) 
-    let todo = todos.find((ele) => { return ele.id === +id })
-    if (!todo) {
-        return res.status(404).json({ message: "fail" });
+exports.getTodos = async (req, res) => {
+    const todos = await todoModel.find();
+    try {
+        res.status(200).json({ data: todos, message: "Successfull" });
+    } catch (error) {
+        res.status(400).json({ message: "fail" })
     }
-    res.status(200).json({ message: "Successfull", data: todo });
 }
 
-exports.deleteTodo = (req, res) => {
+exports.getTodoById = async (req, res) => {
     let { id } = req.params;
-    let todos = JSON.parse(fs.readFileSync('./todos.json', { encoding: 'utf8' }));
-    let todoIndex = todos.findIndex((ele) => ele.id == id); // if not found => -1
-    if (todoIndex == -1) {
-        return res.status(404).json({ message: "this is not found " })
+    try {
+        const todo = await todoModel.findById(id);
+        if (!todo) {
+            return res.status(404).json({ message: 'this todo is not found' })
+        }
+        res.status(200).json({ message: "successfully", data: todo });
+    } catch (error) {
+        res.status(400).json({ message: "fail" })
     }
-    console.log(todoIndex)
-    todos.splice(todoIndex, 1);
-    console.log(todos);
-    fs.writeFile('./todos.json', JSON.stringify(todos), () => {
+}
+
+exports.deleteTodo = async (req, res) => {
+    let { id } = req.params;
+    try {
+        let todo = await todoModel.findByIdAndDelete(id);
+        if (!todo) {
+            res.status(404).json({ message: "this todo is not found" })
+        }
         res.status(204).json();
-    })
+    } catch (error) {
+        res.status(500).json();
+    }
+}
+
+exports.updateTodo = async (req, res)=>{
+    const {id} = req.params;
+    const newTodo = req.body;
+    console.log(newTodo)
+    try{
+        const todo = await todoModel.findByIdAndUpdate(id, newTodo , {new: true});
+        if (!todo) {
+            return res.status(404).json({message: "fail"})
+        }
+        res.status(201).json({message: "upated successfully" , data: newTodo});
+    }catch(error){
+        res.status(400).json({message: "fail"})
+    }
 }
