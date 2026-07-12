@@ -1,4 +1,3 @@
-const fs = require('fs');
 const todoModel = require('../Models/todo.model');
 
 exports.save = async (req, res) => {
@@ -8,8 +7,8 @@ exports.save = async (req, res) => {
 }
 
 exports.getTodos = async (req, res) => {
-    const todos = await todoModel.find();
     try {
+        const todos = await todoModel.find();
         res.status(200).json({ data: todos, message: "Successfull" });
     } catch (error) {
         res.status(400).json({ message: "fail" })

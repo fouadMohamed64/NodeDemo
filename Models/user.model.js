@@ -16,6 +16,14 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         requried: true
+    },
+    role: {
+        type: String,
+        enum: ['admin' , 'user'],
+        default: 'user'
+    },
+    refreshToken:{
+        type: String,
     }
 })
 

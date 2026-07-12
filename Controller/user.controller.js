@@ -1,4 +1,7 @@
 const userModel = require('../Models/user.model');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 
 exports.saveUser = async (req, res) => {
     let user = req.body;
@@ -53,4 +56,46 @@ exports.deleteUser = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: "fail" })
     }
+}
+
+exports.login = async (req, res) => {
+    let { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ message: "you must provide email and password..." });
+
+    try {
+        let user = await userModel.findOne({ email: email });
+        if (!user) return res.status(404).json({ message: "User is not found..." });
+
+        let isValid = await bcryptjs.compare(password, user.password);
+        if (!isValid) return res.status(400).json({ message: "invalid email or password" });
+
+        //! Generate Token
+        const token = jwt.sign({ id: user._id, userName: user.userName, email: user.email, role: user.role },
+            process.env.MY_SECRET,
+            { expiresIn: '6h' }
+        );
+        const refreshToken = jwt.sign({ id: user._id, userName: user.userName, email: user.email, role: user.role },
+            process.env.MY_RefreshSECRET,
+            { expiresIn: '4d' }
+        );
+        await userModel.findByIdAndUpdate(user._id, { refreshToken })
+        // await userModel.findOneAndUpdate({_id: user._id}, {refreshToken})
+        res.status(200).json({ message: "Success", token, refreshToken })
+    } catch (error) {
+        res.status(400).json({ message: "from catch login" })
+    }
+}
+
+exports.refreshToken = async () => {
+    let { refreshToken } = req.body;
+    if (!refreshToken) return res.status(400).json({ message: "you must provide refreshToken" });
+    let decoded = await promisify(jwt.verify)(refreshToken, prosses.env.MY_RefreshSECRET);
+    let user = await userModel.findOne({ _id: decoded._id })
+    if (!user || user.refreshToken != refreshToken) return res.status(400).json({ message: "dosen't match" });
+
+    const token = jwt.sign({ id: user._id, userName: user.userName, email: user.email, role: user.role },
+        process.env.MY_SECRET,
+        { expiresIn: '6h' }
+    );
+    res.status(200).json({ message: "Success", token })
 }

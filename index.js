@@ -4,9 +4,10 @@ const mongoose = require('mongoose');
 const todoRoutes = require('./Routes/todos.route');
 const userRoutes = require('./Routes/users.route');
 const cors = require('cors');
+const dotenv = require("dotenv");
 
 const app = express();
-
+dotenv.config();
 
 
 // Middle ware => parsing JSON into JS
