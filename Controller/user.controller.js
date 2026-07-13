@@ -86,16 +86,22 @@ exports.login = async (req, res) => {
     }
 }
 
-exports.refreshToken = async () => {
+exports.refreshToken = async (req , res ) => {
     let { refreshToken } = req.body;
     if (!refreshToken) return res.status(400).json({ message: "you must provide refreshToken" });
-    let decoded = await promisify(jwt.verify)(refreshToken, prosses.env.MY_RefreshSECRET);
-    let user = await userModel.findOne({ _id: decoded._id })
-    if (!user || user.refreshToken != refreshToken) return res.status(400).json({ message: "dosen't match" });
 
-    const token = jwt.sign({ id: user._id, userName: user.userName, email: user.email, role: user.role },
-        process.env.MY_SECRET,
-        { expiresIn: '6h' }
-    );
-    res.status(200).json({ message: "Success", token })
+    try {
+        let decoded = await promisify(jwt.verify)(refreshToken, process.env.MY_RefreshSECRET);
+        console.log(decoded)
+        let user = await userModel.findOne({ _id: decoded.id })
+        if (!user || user.refreshToken != refreshToken) return res.status(400).json({ message: "dosen't match" });
+
+        const token = jwt.sign({ id: user._id, userName: user.userName, email: user.email, role: user.role },
+            process.env.MY_SECRET,
+            { expiresIn: '6h' }
+        );
+        res.status(200).json({ message: "Success", token })
+    } catch (error) {
+        res.status(400).json({ message: "file" })
+    }
 }

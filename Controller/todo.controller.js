@@ -6,12 +6,13 @@ exports.save = async (req, res) => {
     res.status(201).json({ message: "Created Successfully", data: todo })
 }
 
+//! populate
 exports.getTodos = async (req, res) => {
     try {
-        const todos = await todoModel.find();
+        const todos = await todoModel.find().populate('user', '-_id -__v -refreshToken -password -email -role');
         res.status(200).json({ data: todos, message: "Successfull" });
     } catch (error) {
-        res.status(400).json({ message: "fail" })
+        res.status(400).json({ message: "fail in get todos" })
     }
 }
 
@@ -53,5 +54,14 @@ exports.updateTodo = async (req, res)=>{
         res.status(201).json({message: "upated successfully" , data: newTodo});
     }catch(error){
         res.status(400).json({message: "fail"})
+    }
+}
+
+exports.viewAllTodos =async (req, res)=>{
+    try{
+        let todos = await todoModel.find() 
+        res.render('todos', {todos})
+    }catch(error){
+        console.log('error , ', error)
     }
 }

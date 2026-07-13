@@ -6,9 +6,9 @@ exports.auth =async (req, res, next) => {
     if(!authorization) return res.status(400).json({message: "you must provide Authorization Key"});
 
     try{
-        //! jwt.verify(authorization, 'THIS_IS_MYJSONWEBTOKENSECRETKEY' , ()=>{})
+        // ! jwt.verify(authorization, 'THIS_IS_MYJSONWEBTOKENSECRETKEY' , ()=>{})
         const decoded = await promisify(jwt.verify)(authorization, process.env.MY_SECRET)
-        req.role = decoded.role
+        req.role = decoded.role; // user role => token payload 
         // console.log(decoded);
         // if(!decoded) return res.status(401).json({message: "you must provide valid token"});
         next();

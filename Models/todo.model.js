@@ -12,6 +12,10 @@ const todoSchema = mongoose.Schema({
         enum: ['Todo', 'In-Progress', 'Done'],
         default: "Todo"
     },
+    user: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'User'
+    }
 })
 
 const todoModel = mongoose.model("Todo" , todoSchema);

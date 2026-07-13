@@ -6,8 +6,15 @@ const userRoutes = require('./Routes/users.route');
 const cors = require('cors');
 const dotenv = require("dotenv");
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
+
+
+
 const app = express();
 dotenv.config();
+
 
 
 // Middle ware => parsing JSON into JS
@@ -18,6 +25,9 @@ app.use(function (req, res, next) {
     next();
 })
 
+app.set('view engine', 'pug')
+app.set('views', './Views')
+
 app.use(express.static('./Static'));
 // app.use(cors({
 //     methods: "POST GET PATCH",
@@ -25,9 +35,11 @@ app.use(express.static('./Static'));
 // }))
 
 
+
 app.use('/todo', todoRoutes);
 app.use('/user', userRoutes);
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /**
  * URL/PORT/todo/todo
@@ -89,3 +101,6 @@ const port = 3000;
 app.listen(port, (error) => {
     console.log(`listening successfully on port ${port}`);
 })
+
+
+// Template Engine => ejs , pugjs 
