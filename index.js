@@ -107,3 +107,21 @@ app.listen(port, (error) => {
 
 
 // this is the first commit to ali
+
+
+
+
+// mongoose.connect('mongodb://127.0.0.1:27017/Todos')
+//     .then(() => {
+//         console.log('Connected Successfully On Database')
+//     })
+//     .catch((error) => {
+//         console.log(error)
+//     })
+
+
+
+// const port = 3000;
+// app.listen(port, (error) => {
+//     console.log(`listening successfully on port ${port}`);
+// })
